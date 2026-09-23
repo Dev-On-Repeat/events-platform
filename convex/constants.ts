@@ -1,0 +1,40 @@
+// Durations in milliseconds
+export const DURATIONS = {
+  TICKET_OFFER: 10 * 60 * 1000, // 10 minutes purchase window
+  HEARTBEAT_TIMEOUT: 2 * 60 * 1000, // 2 minutes heartbeat
+} as const;
+
+export const REGISTRATION_STATUS = {
+  PENDING: "PENDING",
+  HELD: "HELD",
+  PAYMENT_PENDING: "PAYMENT_PENDING",
+  CONFIRMED: "CONFIRMED",
+  EXPIRED: "EXPIRED",
+  CANCELLED: "CANCELLED",
+  REFUNDED: "REFUNDED",
+} as const;
+
+export const PAYMENT_STATUS = {
+  CREATED: "CREATED",
+  PENDING: "PENDING",
+  AUTHORIZED: "AUTHORIZED",
+  CAPTURED: "CAPTURED",
+  FAILED: "FAILED",
+  CANCELLED: "CANCELLED",
+  REFUNDED: "REFUNDED",
+} as const;
+
+export const TICKET_STATUS = {
+  VALID: "VALID",
+  USED: "USED",
+  CANCELLED: "CANCELLED",
+  REFUNDED: "REFUNDED",
+} as const;
+
+export const QUEUE_STATUS = {
+  WAITING: "WAITING",
+  OFFERED: "OFFERED",
+  PURCHASED: "PURCHASED",
+  EXPIRED: "EXPIRED",
+  ABANDONED: "ABANDONED",
+} as const;
