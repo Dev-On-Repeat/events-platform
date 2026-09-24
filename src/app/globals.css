@@ -252,22 +252,3 @@
     display: none !important;
   }
 }
-
-/* ── light event-platform surface ──────────────────────────── */
-@layer utilities {
-  .bg-ink, .bg-ink-soft, .bg-ink\/90, .bg-ink\/80, .bg-ink\/60 { background-color: #ffffff !important; }
-  .text-bone, .text-bone-dim, .text-bone-faint { color: #17213d !important; }
-  .border-ink-line { border-color: #e3e7f0 !important; }
-  .divide-ink-line > :not([hidden]) ~ :not([hidden]) { border-color: #e3e7f0 !important; }
-  .bg-bone { background-color: #f7f8fc !important; }
-  .text-ink { color: #17213d !important; }
-  .border-ink { border-color: #17213d !important; }
-  .bg-acid { background-color: #5b5ce2 !important; }
-  .text-acid { color: #5b5ce2 !important; }
-  .border-acid { border-color: #5b5ce2 !important; }
-  .text-outline { -webkit-text-stroke-color: #5b5ce2 !important; }
-  .text-outline-faint { -webkit-text-stroke-color: rgba(91, 92, 226, 0.25) !important; }
-  .text-outline-ink { -webkit-text-stroke-color: #17213d !important; }
-  .grid-bg-fine { background-image: linear-gradient(to right, rgba(91, 92, 226, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(91, 92, 226, 0.05) 1px, transparent 1px); }
-  .halftone { background-image: radial-gradient(rgba(23, 33, 61, 0.08) 1px, transparent 1px); }
-}

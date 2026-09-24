@@ -24,7 +24,7 @@ const COLUMNS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-ink-line bg-white print:hidden">
+    <footer className="border-t border-ink-line bg-ink print:hidden">
       {/* giant wordmark band */}
       <div className="overflow-hidden border-b border-ink-line px-5 py-10 sm:px-8">
         <Wordmark size="xl" href={null} className="text-outline-faint hover:text-outline transition-colors" />
