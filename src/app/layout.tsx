@@ -16,6 +16,13 @@ export const metadata: Metadata = {
   title: "HackB4 — Event Ticketing & Registration",
   description:
     "Event ticketing and registration platform with instant digital passes.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" },
+    ],
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
