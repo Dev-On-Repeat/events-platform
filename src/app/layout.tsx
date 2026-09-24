@@ -44,7 +44,7 @@ export default function RootLayout({
       lang="en"
       className={`${dmSans.variable} ${spaceMono.variable} ${instrumentSerif.variable} h-full antialiased scroll-smooth`}
     >
-      <body className="flex min-h-full flex-col bg-ink text-bone">
+      <body className="flex min-h-full flex-col bg-white text-ink">
         <div className="grain-overlay" aria-hidden />
         <ConvexClientProvider>
           <Header />
@@ -54,10 +54,10 @@ export default function RootLayout({
             position="top-center"
             toastOptions={{
               style: {
-                background: "#131311",
-                color: "#EDE8DC",
-                border: "1px solid #26261F",
-                borderRadius: 0,
+                background: "#ffffff",
+                color: "#17213d",
+                border: "1px solid #e3e7f0",
+                borderRadius: 14,
                 fontFamily: "var(--font-terminal)",
                 fontSize: "12px",
                 letterSpacing: "0.04em",

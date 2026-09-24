@@ -41,7 +41,7 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-ink-line bg-ink/90 shadow-[0_8px_30px_rgba(33,45,84,0.06)] backdrop-blur-xl print:hidden">
+    <header className="sticky top-0 z-50 border-b border-ink-line bg-white/90 shadow-[0_8px_30px_rgba(33,45,84,0.08)] backdrop-blur-xl print:hidden">
       <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-6 px-5 py-5 sm:px-8">
         <Wordmark size="sm" />
 
