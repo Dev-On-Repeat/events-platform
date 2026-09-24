@@ -55,7 +55,7 @@ export default function Home() {
         {/* vignette + scanline */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,#0B0B09_88%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,#ffffff_88%)]"
         />
         <div
           aria-hidden
@@ -115,7 +115,7 @@ export default function Home() {
         </div>
 
         {/* stats strip */}
-        <div className="relative z-10 border-t border-ink-line bg-ink/70 backdrop-blur-sm">
+        <div className="relative z-10 border-t border-ink-line bg-white/80 backdrop-blur-sm">
           <div className="mx-auto grid max-w-[1400px] grid-cols-2 divide-x divide-ink-line sm:grid-cols-4">
             {[
               { v: String(upcoming.length).padStart(2, "0"), l: "Upcoming departures" },

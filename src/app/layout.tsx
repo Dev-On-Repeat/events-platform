@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Anton, Space_Mono, Instrument_Serif } from "next/font/google";
+import { DM_Sans, Space_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { Toaster } from "sonner";
 
-const anton = Anton({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-anton",
 });
@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${anton.variable} ${spaceMono.variable} ${instrumentSerif.variable} h-full antialiased scroll-smooth`}
+      className={`${dmSans.variable} ${spaceMono.variable} ${instrumentSerif.variable} h-full antialiased scroll-smooth`}
     >
       <body className="flex min-h-full flex-col bg-ink text-bone">
         <div className="grain-overlay" aria-hidden />
