@@ -41,8 +41,8 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-[0_8px_30px_rgba(30,41,59,0.06)] backdrop-blur-xl print:hidden">
-      <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-6 px-5 py-4 sm:px-8">
+    <header className="sticky top-0 z-50 border-b border-ink-line bg-white/90 shadow-[0_8px_30px_rgba(33,45,84,0.08)] backdrop-blur-xl print:hidden">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-6 px-5 py-5 sm:px-8">
         <Wordmark size="sm" />
 
         {/* primary nav — typographic only */}
@@ -56,10 +56,10 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                className={`link-sweep font-terminal text-[11px] uppercase tracking-[0.22em] transition-colors ${
                   active
-                    ? "bg-indigo-50 text-indigo-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-indigo-700"
+                    ? "link-sweep-active text-acid"
+                    : "text-bone-dim hover:text-bone"
                 }`}
               >
                 {item.label}
@@ -69,8 +69,8 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <span className="hidden items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500 sm:flex">
-            <span className="size-2 rounded-full bg-emerald-400" />
+          <span className="hidden items-center gap-2 text-[11px] uppercase tracking-[0.18em] sm:flex">
+            <span className="inline-block h-1.5 w-1.5 animate-blink rounded-full bg-acid" />
             <LiveClock />
           </span>
         </div>

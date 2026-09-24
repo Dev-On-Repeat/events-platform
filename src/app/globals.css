@@ -46,11 +46,11 @@
   }
 
   body {
-    @apply bg-white text-slate-900 font-terminal;
+    @apply bg-ink text-bone font-terminal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background-image: radial-gradient(circle at 15% 0%, rgba(99, 102, 241, 0.045), transparent 28rem), radial-gradient(circle at 90% 12%, rgba(251, 146, 60, 0.04), transparent 24rem);
+    background-image: radial-gradient(circle at 15% 0%, rgba(91, 92, 226, 0.08), transparent 28rem), radial-gradient(circle at 90% 12%, rgba(239, 106, 91, 0.08), transparent 24rem);
   }
 
   ::selection {
@@ -59,7 +59,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #6366f1;
+    outline: 2px solid #d8ff3e;
     outline-offset: 2px;
   }
 
