@@ -14,16 +14,16 @@ export default {
     extend: {
       colors: {
         // ── HackB4 terminal palette ─────────────────────────────
-        ink: "#ffffff",
-        "ink-soft": "#f7f8fc",
-        "ink-line": "#e2e7f0",
-        bone: "#17213d",
-        "bone-dim": "#596783",
-        "bone-faint": "#8a96ad",
-        acid: "#5b5ce2",
-        "acid-deep": "#4546bf",
-        signal: "#ef6a5b",
-        amberish: "#f4b740",
+        ink: "#0B0B09",
+        "ink-soft": "#131311",
+        "ink-line": "#26261F",
+        bone: "#EDE8DC",
+        "bone-dim": "#B9B4A6",
+        "bone-faint": "#6E6A5E",
+        acid: "#D8FF3E",
+        "acid-deep": "#9BBF1E",
+        signal: "#FF4B1F",
+        amberish: "#FFB800",
         // ── shadcn tokens (admin + form primitives stay light) ──
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
