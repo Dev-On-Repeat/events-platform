@@ -58,14 +58,19 @@ export async function POST(req: NextRequest) {
         { orderId }
       );
 
-      if (matchingPayment) {
+      const registrationId =
+        matchingPayment?.registrationId ||
+        paymentEntity?.notes?.registrationId ||
+        payload.payload?.order?.entity?.notes?.registrationId;
+
+      if (registrationId) {
         const serverSecret = process.env.AUTH_SECRET || "internal_hackb4_secret";
 
         // Atomic Confirmation in Convex (idempotent, won't duplicate tickets if already processed)
         await convex.mutation(api.payments.confirmPaymentAndIssueTickets, {
-          registrationId: matchingPayment.registrationId,
-          orderId: orderId,
-          paymentId: paymentId || matchingPayment.paymentId || `pay_${orderId}`,
+          registrationId,
+          orderId,
+          paymentId: paymentId || matchingPayment?.paymentId || `pay_${orderId}`,
           amount: amountInRupees,
           provider: "razorpay",
           serverSecret,
@@ -77,6 +82,8 @@ export async function POST(req: NextRequest) {
           eventType,
           status: "SUCCESS",
         });
+      } else {
+        console.warn(`Webhook received for order ${orderId}, but no registrationId could be located in DB or notes.`);
       }
     }
 
