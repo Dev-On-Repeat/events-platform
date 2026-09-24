@@ -3,9 +3,15 @@ import { v } from "convex/values";
 import { TICKET_STATUS } from "./constants";
 
 export const getById = query({
-  args: { ticketId: v.id("tickets") },
+  // Accepts any ID string: the ticket page probes with either a ticket ID
+  // or a registration ID (fallback flow), so an invalid tickets ID must
+  // return null instead of throwing a validator error.
+  args: { ticketId: v.string() },
   handler: async (ctx, { ticketId }) => {
-    const ticket = await ctx.db.get(ticketId);
+    const normalized = ctx.db.normalizeId("tickets", ticketId);
+    if (!normalized) return null;
+
+    const ticket = await ctx.db.get(normalized);
     if (!ticket) return null;
 
     const event = await ctx.db.get(ticket.eventId);
@@ -20,16 +26,19 @@ export const getById = query({
 });
 
 export const getByRegistrationId = query({
-  args: { registrationId: v.id("registrations") },
+  args: { registrationId: v.string() },
   handler: async (ctx, { registrationId }) => {
+    const normalized = ctx.db.normalizeId("registrations", registrationId);
+    if (!normalized) return [];
+
     const tickets = await ctx.db
       .query("tickets")
       .withIndex("by_registration", (q) =>
-        q.eq("registrationId", registrationId)
+        q.eq("registrationId", normalized)
       )
       .collect();
 
-    const registration = await ctx.db.get(registrationId);
+    const registration = await ctx.db.get(normalized);
     let event = null;
     if (registration) {
       event = await ctx.db.get(registration.eventId);

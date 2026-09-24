@@ -4,87 +4,103 @@ import { Suspense } from "react";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useSearchParams } from "next/navigation";
-import EventCard from "@/components/EventCard";
-import { Search } from "lucide-react";
-import Spinner from "@/components/Spinner";
+import Link from "next/link";
+import EventRow, {
+  BoardHeaderRow,
+  EventRowSkeleton,
+} from "@/components/EventRow";
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const searchResults = useQuery(api.events.list, { search: query });
 
-  if (!searchResults) {
-    return (
-      <div className="min-h-[400px] flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
-  }
-
   const now = Date.now();
-  const upcomingEvents = searchResults
-    .filter((event) => event.eventDate > now)
-    .sort((a, b) => a.eventDate - b.eventDate);
-
-  const pastEvents = searchResults
-    .filter((event) => event.eventDate <= now)
-    .sort((a, b) => b.eventDate - a.eventDate);
+  const upcoming = searchResults
+    ? searchResults
+        .filter((event) => event.eventDate > now)
+        .sort((a, b) => a.eventDate - b.eventDate)
+    : [];
+  const past = searchResults
+    ? searchResults
+        .filter((event) => event.eventDate <= now)
+        .sort((a, b) => b.eventDate - a.eventDate)
+    : [];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Search Results Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <Search className="w-6 h-6 text-gray-400" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Search Results for &quot;{query}&quot;
-            </h1>
-            <p className="text-gray-600 text-sm mt-1">
-              Found {searchResults.length} events
-            </p>
-          </div>
-        </div>
+    <div className="grid-bg min-h-screen">
+      <div className="mx-auto max-w-[1400px] px-5 pb-24 pt-14 sm:px-8 sm:pt-20">
+        <p className="animate-rise-in text-[10px] uppercase tracking-[0.35em] text-bone-faint">
+          HackB4 <span className="text-acid">/</span> Manifest scan
+        </p>
+        <h1 className="mt-4 font-display text-[clamp(2.5rem,7vw,6rem)] uppercase leading-[0.95] tracking-wide">
+          Results for{" "}
+          <span className="font-flourish normal-case italic tracking-normal text-acid">
+            “{query}”
+          </span>
+          <sup className="ml-3 align-super font-terminal text-sm tracking-[0.2em] text-bone-dim">
+            [{searchResults ? searchResults.length : "··"}]
+          </sup>
+        </h1>
 
-        {/* No Results State */}
-        {searchResults.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
-            <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900">
-              No events found
-            </h3>
-            <p className="text-gray-500 text-sm mt-1">
-              Try adjusting your search terms or browse all events
-            </p>
-          </div>
-        )}
-
-        {/* Upcoming Events */}
-        {upcomingEvents.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Upcoming Events
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event) => (
-                <EventCard key={event._id} event={event as any} />
+        {!searchResults ? (
+          <div className="mt-16 border border-ink-line bg-ink-soft/60">
+            <BoardHeaderRow />
+            <div className="divide-y divide-ink-line border-t border-ink-line">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <EventRowSkeleton key={i} index={i} />
               ))}
             </div>
           </div>
-        )}
-
-        {/* Past Events */}
-        {pastEvents.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
-              Past Events
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastEvents.map((event) => (
-                <EventCard key={event._id} event={event as any} />
-              ))}
-            </div>
+        ) : searchResults.length === 0 ? (
+          <div className="mt-16 border border-ink-line bg-ink-soft/60 px-6 py-20 text-center">
+            <p className="font-flourish text-3xl italic text-bone-dim">
+              Nothing on the manifest for that.
+            </p>
+            <p className="mt-3 text-[11px] uppercase tracking-[0.25em] text-bone-faint">
+              Try a different call sign — or scan the full board
+            </p>
+            <Link
+              href="/events"
+              className="mt-8 inline-block border border-acid bg-acid px-8 py-3 text-[11px] uppercase tracking-[0.3em] text-ink transition-colors hover:bg-transparent hover:text-acid"
+            >
+              Full departures board
+            </Link>
           </div>
+        ) : (
+          <>
+            {upcoming.length > 0 && (
+              <div className="mt-14 border border-ink-line bg-ink-soft/60">
+                <div className="border-b border-ink-line px-4 py-3 text-[10px] uppercase tracking-[0.3em] text-bone-dim sm:px-6">
+                  Upcoming matches <span className="text-acid">— Live</span>
+                </div>
+                <BoardHeaderRow />
+                <div className="divide-y divide-ink-line border-t border-ink-line">
+                  {upcoming.map((event, i) => (
+                    <EventRow key={event._id} event={event} index={i} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {past.length > 0 && (
+              <div className="mt-12">
+                <div className="flex items-baseline justify-between border-b border-ink-line pb-3">
+                  <h2 className="font-display text-2xl uppercase tracking-wide text-bone-faint">
+                    Past matches
+                  </h2>
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-bone-faint">
+                    [{past.length}] Archived
+                  </span>
+                </div>
+                <div className="divide-y divide-ink-line">
+                  {past.map((event, i) => (
+                    <EventRow key={event._id} event={event} index={i} dimmed />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -95,8 +111,10 @@ export default function SearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[400px] flex items-center justify-center">
-          <Spinner />
+        <div className="grid-bg flex min-h-[50vh] items-center justify-center">
+          <p className="animate-blink text-[11px] uppercase tracking-[0.4em] text-bone-faint">
+            Scanning manifest<span className="text-acid">…</span>
+          </p>
         </div>
       }
     >

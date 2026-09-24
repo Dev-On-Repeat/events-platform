@@ -1,5 +1,6 @@
 import { cronJobs } from "convex/server";
 import { internalMutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
@@ -7,21 +8,21 @@ const crons = cronJobs();
 crons.interval(
   "cleanup-expired-reservations",
   { minutes: 1 },
-  "queue:cleanupExpiredOffers"
+  internal.queue.cleanupExpiredOffers
 );
 
 // Update event statuses every hour (close registration for past deadlines, mark completed events)
 crons.interval(
   "update-event-statuses",
   { hours: 1 },
-  "crons:updateEventStatuses"
+  internal.crons.updateEventStatuses
 );
 
 // Expire tickets for past events every 6 hours
 crons.interval(
   "expire-past-event-tickets",
   { hours: 6 },
-  "crons:expirePastEventTickets"
+  internal.crons.expirePastEventTickets
 );
 
 // Update event statuses automatically

@@ -4,8 +4,17 @@ import { useState } from "react";
 import { createEventAction } from "@/app/actions/admin";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import AdminShell from "@/components/admin/AdminShell";
+
+const inputCls =
+  "w-full border-b border-ink-line bg-transparent py-2.5 font-terminal text-sm text-bone placeholder:text-bone-faint/60 focus:border-acid focus:outline-none transition-colors";
+
+const labelCls =
+  "mb-1 block text-[9px] uppercase tracking-[0.3em] text-bone-faint";
+
+const selectCls =
+  "w-full border-b border-ink-line bg-ink py-2.5 font-terminal text-sm text-bone focus:border-acid focus:outline-none";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -107,273 +116,111 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
-        <Link
-          href="/admin/events"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Events List</span>
-        </Link>
-
-        <div className="bg-white rounded-xl p-6 sm:p-8 border border-gray-200 shadow-sm">
-          <div className="pb-6 border-b border-gray-100 mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Create New Event
-            </h1>
-            <p className="text-xs text-gray-500 mt-1">
-              Add a new event with configurable pricing, capacity, and team sizes.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Event Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleNameChange}
-                  placeholder="e.g. AI Innovation Summit 2026"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  URL Slug *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
-                  placeholder="ai-innovation-summit-2026"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Category
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Hackathon">Hackathon</option>
-                  <option value="Cultural">Cultural</option>
-                  <option value="Robotics">Robotics</option>
-                  <option value="Conference">Conference</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Workshop">Workshop</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Short Tagline
-                </label>
-                <input
-                  type="text"
-                  value={formData.shortDescription}
-                  onChange={(e) =>
-                    setFormData({ ...formData, shortDescription: e.target.value })
-                  }
-                  placeholder="A flagship 2-day technical summit."
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Full Description
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Describe the event, rules, schedule, and attendee benefits..."
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Venue / Location *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.location}
-                  onChange={(e) =>
-                    setFormData({ ...formData, location: e.target.value })
-                  }
-                  placeholder="Main Auditorium, Tech Campus"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) =>
-                    setFormData({ ...formData, city: e.target.value })
-                  }
-                  placeholder="Bengaluru"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Ticket Price (₹ INR) *
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: Number(e.target.value) })
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="text-[10px] text-gray-400">Set 0 for free events</span>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Capacity (Total Tickets) *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  value={formData.totalTickets}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      totalTickets: Number(e.target.value),
-                    })
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Participation Mode
-                </label>
-                <select
-                  value={formData.participationType}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      participationType: e.target.value as any,
-                    })
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="SOLO">Solo (Individual Only)</option>
-                  <option value="TEAM">Team Only</option>
-                  <option value="BOTH">Both (Solo or Team)</option>
-                </select>
-              </div>
-
-              {formData.participationType !== "SOLO" && (
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <label className="block font-semibold text-gray-700 mb-1">
-                      Min Team Size
-                    </label>
-                    <input
-                      type="number"
-                      min="2"
-                      value={formData.minTeamSize}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          minTeamSize: Number(e.target.value),
-                        })
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block font-semibold text-gray-700 mb-1">
-                      Max Team Size
-                    </label>
-                    <input
-                      type="number"
-                      min="2"
-                      value={formData.maxTeamSize}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          maxTeamSize: Number(e.target.value),
-                        })
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="sm:col-span-2">
-                <label className="block font-semibold text-gray-700 mb-1">
-                  Banner Image URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, imageUrl: e.target.value })
-                  }
-                  placeholder="https://..."
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 font-mono text-[11px]"
-                />
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
-              <Link
-                href="/admin/events"
-                className="px-5 py-2 rounded-lg border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Plus className="w-4 h-4" />
-                )}
-                <span>Publish Event</span>
-              </button>
-            </div>
-          </form>
+    <AdminShell
+      tag="— New departure"
+      title="Create"
+      accent="event"
+      active="/admin/events"
+    >
+      <form onSubmit={handleSubmit} className="max-w-3xl border border-ink-line bg-ink-soft/60">
+        <div className="border-b border-ink-line px-6 py-4 sm:px-8">
+          <h2 className="font-display text-xl uppercase tracking-wide">
+            Manifest <span className="text-outline">details</span>
+          </h2>
+          <p className="mt-0.5 text-[10px] uppercase tracking-[0.15em] text-bone-faint">
+            Pricing, capacity and team rules go live instantly on publish
+          </p>
         </div>
-      </div>
-    </div>
+
+        <div className="grid gap-x-10 gap-y-7 px-6 py-8 sm:grid-cols-2 sm:px-8">
+          <div>
+            <label htmlFor="ev-name" className={labelCls}>Event name *</label>
+            <input id="ev-name" type="text" required value={formData.name} onChange={handleNameChange} placeholder="e.g. AI Innovation Summit 2026" className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor="ev-slug" className={labelCls}>URL slug *</label>
+            <input id="ev-slug" type="text" required value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="ai-innovation-summit-2026" className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor="ev-cat" className={labelCls}>Category</label>
+            <select id="ev-cat" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className={selectCls}>
+              <option value="Hackathon">Hackathon</option>
+              <option value="Cultural">Cultural</option>
+              <option value="Robotics">Robotics</option>
+              <option value="Conference">Conference</option>
+              <option value="Sports">Sports</option>
+              <option value="Workshop">Workshop</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="ev-tag" className={labelCls}>Short tagline</label>
+            <input id="ev-tag" type="text" value={formData.shortDescription} onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })} placeholder="A flagship 2-day technical summit." className={inputCls} />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="ev-desc" className={labelCls}>Full description</label>
+            <textarea id="ev-desc" rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Describe the event, rules, schedule, and attendee benefits…" className={`${inputCls} resize-y`} />
+          </div>
+          <div>
+            <label htmlFor="ev-loc" className={labelCls}>Venue / location *</label>
+            <input id="ev-loc" type="text" required value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} placeholder="Main Auditorium, Tech Campus" className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor="ev-city" className={labelCls}>City</label>
+            <input id="ev-city" type="text" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} placeholder="Bengaluru" className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor="ev-price" className={labelCls}>Ticket price ₹ *</label>
+            <input id="ev-price" type="number" min="0" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })} className={inputCls} />
+            <span className="mt-1 block text-[9px] uppercase tracking-[0.15em] text-bone-faint">
+              Set 0 for free events
+            </span>
+          </div>
+          <div>
+            <label htmlFor="ev-cap" className={labelCls}>Capacity (total tickets) *</label>
+            <input id="ev-cap" type="number" min="1" required value={formData.totalTickets} onChange={(e) => setFormData({ ...formData, totalTickets: Number(e.target.value) })} className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor="ev-mode" className={labelCls}>Participation mode</label>
+            <select id="ev-mode" value={formData.participationType} onChange={(e) => setFormData({ ...formData, participationType: e.target.value as any })} className={selectCls}>
+              <option value="SOLO">Solo (individual only)</option>
+              <option value="TEAM">Team only</option>
+              <option value="BOTH">Both (solo or team)</option>
+            </select>
+          </div>
+          {formData.participationType !== "SOLO" && (
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <label htmlFor="ev-min" className={labelCls}>Min team size</label>
+                <input id="ev-min" type="number" min="2" value={formData.minTeamSize} onChange={(e) => setFormData({ ...formData, minTeamSize: Number(e.target.value) })} className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="ev-max" className={labelCls}>Max team size</label>
+                <input id="ev-max" type="number" min="2" value={formData.maxTeamSize} onChange={(e) => setFormData({ ...formData, maxTeamSize: Number(e.target.value) })} className={inputCls} />
+              </div>
+            </div>
+          )}
+          <div className="sm:col-span-2">
+            <label htmlFor="ev-img" className={labelCls}>Banner image URL</label>
+            <input id="ev-img" type="url" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://…" className={`${inputCls} text-[11px]`} />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-ink-line px-6 py-5 sm:px-8">
+          <Link
+            href="/admin/events"
+            className="text-[10px] uppercase tracking-[0.25em] text-bone-faint transition-colors hover:text-bone"
+          >
+            ← Cancel
+          </Link>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="border border-acid bg-acid px-8 py-3 text-[11px] uppercase tracking-[0.3em] text-ink transition-colors hover:bg-transparent hover:text-acid disabled:cursor-wait disabled:opacity-60"
+          >
+            {isSubmitting ? "Publishing…" : "Publish event →"}
+          </button>
+        </div>
+      </form>
+    </AdminShell>
   );
 }

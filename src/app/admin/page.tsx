@@ -3,18 +3,8 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
-import {
-  Calendar,
-  Ticket,
-  Users,
-  CreditCard,
-  Plus,
-  ArrowUpRight,
-  TrendingUp,
-  Clock,
-  ShieldCheck,
-} from "lucide-react";
 import { toast } from "sonner";
+import AdminShell from "@/components/admin/AdminShell";
 
 export default function AdminDashboardPage() {
   const metrics = useQuery(api.registrations.getMetrics);
@@ -31,220 +21,167 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20">
-      {/* Top Header */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider border border-blue-200">
-                Management Portal
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
-              Organizer & Admin Overview
-            </h1>
-            <p className="text-xs text-gray-500 mt-1">
-              Live capacity monitoring, registration audits, and gate check-in controls.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/admin/events/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-sm transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create Event</span>
-            </Link>
-
-            <Link
-              href="/admin/checkin"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium shadow-sm transition-all"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Gate Scanner</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-gray-200 pb-3 overflow-x-auto">
+    <AdminShell
+      tag="— Control room"
+      title="Ops"
+      accent="overview"
+      active="/admin"
+      actions={
+        <>
           <Link
-            href="/admin"
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-white shadow-sm"
+            href="/admin/events/new"
+            className="border border-acid bg-acid px-5 py-2.5 text-[10px] uppercase tracking-[0.25em] text-ink transition-colors hover:bg-transparent hover:text-acid"
           >
-            Dashboard
-          </Link>
-          <Link
-            href="/admin/events"
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
-          >
-            Events
-          </Link>
-          <Link
-            href="/admin/registrations"
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
-          >
-            Registrations
+            + Create event
           </Link>
           <Link
             href="/admin/checkin"
-            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+            className="border border-ink-line px-5 py-2.5 text-[10px] uppercase tracking-[0.25em] text-bone-dim transition-colors hover:border-bone hover:text-bone"
           >
-            Gate Check-in
+            Gate scanner
           </Link>
+        </>
+      }
+    >
+      {/* metrics */}
+      <div className="grid grid-cols-2 gap-px border border-ink-line bg-ink-line lg:grid-cols-4">
+        {[
+          {
+            l: "Total revenue",
+            v: metrics ? `₹${metrics.totalRevenue.toLocaleString()}` : "··",
+            s: "Razorpay / mock verified",
+            tone: "text-acid",
+          },
+          {
+            l: "Tickets confirmed",
+            v: metrics ? String(metrics.totalTicketsSold) : "··",
+            s: metrics ? `${metrics.confirmedRegistrations} registrations` : "—",
+            tone: "text-bone",
+          },
+          {
+            l: "Active events",
+            v: events ? String(events.length) : "··",
+            s: "Published on platform",
+            tone: "text-bone",
+          },
+          {
+            l: "Pending / queue",
+            v: metrics ? String(metrics.pendingRegistrations) : "··",
+            s: "Held in 10-min windows",
+            tone: "text-amberish",
+          },
+        ].map((m) => (
+          <div key={m.l} className="bg-ink-soft px-6 py-7">
+            <div className="text-[9px] uppercase tracking-[0.3em] text-bone-faint">
+              {m.l}
+            </div>
+            <div className={`mt-3 font-display text-4xl tracking-wide ${m.tone}`}>
+              {m.v}
+            </div>
+            <div className="mt-1.5 text-[10px] uppercase tracking-[0.15em] text-bone-faint">
+              {m.s}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* capacity table */}
+      <div className="mt-8 border border-ink-line bg-ink-soft/60">
+        <div className="flex items-center justify-between border-b border-ink-line px-6 py-4">
+          <div>
+            <h2 className="font-display text-xl uppercase tracking-wide">
+              Live capacity tracker
+            </h2>
+            <p className="mt-0.5 text-[10px] uppercase tracking-[0.15em] text-bone-faint">
+              Atomic OCC inventory — zero overselling under burst load
+            </p>
+          </div>
+          {(!events || events.length === 0) && (
+            <button
+              onClick={handleSeed}
+              className="shrink-0 border border-ink-line px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-bone-dim transition-colors hover:border-acid hover:text-acid"
+            >
+              Seed sample events
+            </button>
+          )}
         </div>
 
-        {/* High-Level Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-gray-400 text-xs font-medium">
-              <span>Total Revenue</span>
-              <CreditCard className="w-4 h-4 text-green-600" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900">
-              ₹{metrics ? metrics.totalRevenue.toLocaleString() : "0"}
-            </div>
-            <div className="text-[11px] text-green-700 font-semibold flex items-center gap-1">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Razorpay / Mock Verified</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-gray-400 text-xs font-medium">
-              <span>Tickets Confirmed</span>
-              <Ticket className="w-4 h-4 text-blue-600" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900">
-              {metrics ? metrics.totalTicketsSold : "0"}
-            </div>
-            <div className="text-[11px] text-gray-500">
-              {metrics ? metrics.confirmedRegistrations : "0"} registrations confirmed
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-gray-400 text-xs font-medium">
-              <span>Active Events</span>
-              <Calendar className="w-4 h-4 text-blue-500" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900">
-              {events ? events.length : "0"}
-            </div>
-            <div className="text-[11px] text-gray-500">Events published on platform</div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-gray-400 text-xs font-medium">
-              <span>Pending / In Queue</span>
-              <Clock className="w-4 h-4 text-amber-500" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900">
-              {metrics ? metrics.pendingRegistrations : "0"}
-            </div>
-            <div className="text-[11px] text-amber-600 font-semibold">
-              Currently held in 10-min windows
-            </div>
-          </div>
-        </div>
-
-        {/* Live Event Availability & Capacity Table */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-gray-900">
-                Live Capacity & Inventory Tracker
-              </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Atomic OCC inventory guarantees zero overselling across high-traffic bursts.
-              </p>
-            </div>
-
-            {(!events || events.length === 0) && (
-              <button
-                onClick={handleSeed}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors"
-              >
-                <span>Seed Sample Events</span>
-              </button>
-            )}
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-500 font-semibold border-b border-gray-200">
-                <tr>
-                  <th className="py-3 px-6">Event Name</th>
-                  <th className="py-3 px-4">Price</th>
-                  <th className="py-3 px-4">Capacity</th>
-                  <th className="py-3 px-4">Sold</th>
-                  <th className="py-3 px-4">Reserved (In Checkout)</th>
-                  <th className="py-3 px-4">Available</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-6 text-right">Actions</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-ink-line text-[9px] uppercase tracking-[0.25em] text-bone-faint">
+                <th className="px-6 py-3 font-normal">Event</th>
+                <th className="px-4 py-3 font-normal">Fare</th>
+                <th className="px-4 py-3 font-normal">Cap</th>
+                <th className="px-4 py-3 font-normal">Sold</th>
+                <th className="px-4 py-3 font-normal">Held</th>
+                <th className="px-4 py-3 font-normal">Free</th>
+                <th className="px-4 py-3 font-normal">Status</th>
+                <th className="px-6 py-3 text-right font-normal">·</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-ink-line">
+              {events?.map((e) => (
+                <tr key={e._id} className="transition-colors hover:bg-bone/[0.03]">
+                  <td className="px-6 py-4">
+                    <Link
+                      href={`/events/${e.slug || e._id}`}
+                      className="font-display text-sm uppercase tracking-wide text-bone transition-colors hover:text-acid"
+                    >
+                      {e.name}
+                    </Link>
+                    <div className="mt-0.5 text-[10px] uppercase tracking-[0.15em] text-bone-faint">
+                      {e.city} / {e.category}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 tabular-nums text-bone-dim">
+                    {e.price === 0 ? "FREE" : `₹${e.price}`}
+                  </td>
+                  <td className="px-4 py-4 tabular-nums text-bone-dim">
+                    {e.totalTickets}
+                  </td>
+                  <td className="px-4 py-4 font-bold tabular-nums text-acid">
+                    {e.soldCount}
+                  </td>
+                  <td className="px-4 py-4 font-bold tabular-nums text-amberish">
+                    {e.reservedCount}
+                  </td>
+                  <td className="px-4 py-4 font-bold tabular-nums text-bone">
+                    {e.availableSpots}
+                  </td>
+                  <td className="px-4 py-4">
+                    <span
+                      className={`border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.2em] ${
+                        e.isSoldOut
+                          ? "border-signal text-signal"
+                          : "border-acid text-acid"
+                      }`}
+                    >
+                      {e.isSoldOut ? "Sold out" : e.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right text-bone-faint">
+                    <Link
+                      href={`/events/${e.slug || e._id}`}
+                      className="transition-colors hover:text-acid"
+                      aria-label={`View ${e.name}`}
+                    >
+                      →
+                    </Link>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {events?.map((e) => (
-                  <tr
-                    key={e._id}
-                    className="hover:bg-gray-50/50 transition-colors"
-                  >
-                    <td className="py-4 px-6 font-bold text-gray-900">
-                      <Link
-                        href={`/events/${e.slug || e._id}`}
-                        className="hover:text-blue-600 transition-colors"
-                      >
-                        {e.name}
-                      </Link>
-                      <div className="text-[11px] text-gray-500 font-normal">
-                        {e.city} • {e.category}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 font-semibold">
-                      {e.price === 0 ? "FREE" : `₹${e.price}`}
-                    </td>
-                    <td className="py-4 px-4 font-semibold">{e.totalTickets}</td>
-                    <td className="py-4 px-4 font-bold text-green-700">
-                      {e.soldCount}
-                    </td>
-                    <td className="py-4 px-4 font-bold text-amber-600">
-                      {e.reservedCount}
-                    </td>
-                    <td className="py-4 px-4 font-bold text-blue-600">
-                      {e.availableSpots}
-                    </td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                          e.isSoldOut
-                            ? "bg-red-50 text-red-700 border border-red-200"
-                            : "bg-green-50 text-green-700 border border-green-200"
-                        }`}
-                      >
-                        {e.isSoldOut ? "Sold Out" : e.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <Link
-                        href={`/events/${e.slug || e._id}`}
-                        className="inline-flex items-center gap-1 text-blue-600 font-semibold hover:underline"
-                      >
-                        <span>View</span>
-                        <ArrowUpRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+              {events && events.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-6 py-10 text-center text-bone-faint">
+                    No events yet — seed the board to begin.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
+    </AdminShell>
   );
 }

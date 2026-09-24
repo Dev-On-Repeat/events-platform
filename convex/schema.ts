@@ -144,7 +144,8 @@ export default defineSchema({
       v.literal("VALID"),
       v.literal("USED"),
       v.literal("CANCELLED"),
-      v.literal("REFUNDED")
+      v.literal("REFUNDED"),
+      v.literal("EXPIRED")
     ),
     purchasedAt: v.number(),
     checkedInAt: v.optional(v.number()),

@@ -7,16 +7,235 @@ import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import Image from "next/image";
 import QRCode from "react-qr-code";
-import {
-  CalendarDays,
-  MapPin,
-  User,
-  Ticket as TicketIcon,
-  ArrowLeft,
-  Printer,
-  IdCard,
-} from "lucide-react";
-import Spinner from "@/components/Spinner";
+import { format } from "date-fns";
+
+function PassSkeleton() {
+  return (
+    <div className="grid-bg flex min-h-[70vh] items-center justify-center">
+      <p className="animate-blink text-[11px] uppercase tracking-[0.4em] text-bone-faint">
+        Retrieving pass<span className="text-acid">…</span>
+      </p>
+    </div>
+  );
+}
+
+function PassNotFound({ ticketId }: { ticketId: string }) {
+  return (
+    <div className="grid-bg flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+      <h2 className="font-display text-5xl uppercase tracking-wide">
+        No <span className="text-outline">such pass</span>
+      </h2>
+      <p className="mt-4 max-w-sm font-flourish text-xl italic text-bone-dim">
+        We can&apos;t find a confirmed ticket with identifier{" "}
+        <span className="font-terminal not-italic text-acid">{ticketId}</span>.
+      </p>
+      <Link
+        href="/events"
+        className="mt-8 border border-acid bg-acid px-8 py-3 text-[11px] uppercase tracking-[0.3em] text-ink transition-colors hover:bg-transparent hover:text-acid"
+      >
+        ← Departures board
+      </Link>
+    </div>
+  );
+}
+
+function PassExpired() {
+  return (
+    <div className="grid-bg flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+      <h2 className="font-display text-5xl uppercase tracking-wide">
+        Pass <span className="text-outline">expired</span>
+      </h2>
+      <p className="mt-4 max-w-md font-flourish text-xl italic text-bone-dim">
+        This departure has already concluded. The terminal will ping you when
+        new gates open.
+      </p>
+      <Link
+        href="/events"
+        className="mt-8 border border-acid bg-acid px-8 py-3 text-[11px] uppercase tracking-[0.3em] text-ink transition-colors hover:bg-transparent hover:text-acid"
+      >
+        Next departures
+      </Link>
+    </div>
+  );
+}
+
+function DetailCell({
+  k,
+  v,
+  s,
+}: {
+  k: string;
+  v: string;
+  s?: string;
+}) {
+  return (
+    <div>
+      <div className="text-[8px] uppercase tracking-[0.3em] text-ink/50">{k}</div>
+      <div className="mt-1 font-terminal text-[13px] font-bold uppercase leading-snug text-ink">
+        {v}
+      </div>
+      {s && <div className="text-[9px] text-ink/50">{s}</div>}
+    </div>
+  );
+}
+
+function PassCard({
+  ticket,
+  index,
+  total,
+}: {
+  ticket: {
+    _id: string;
+    status: string;
+    attendeeName: string;
+    attendeeEmail: string;
+    ticketNumber: string;
+    qrPayload: string;
+    purchasedAt: number;
+    event?: {
+      name?: string;
+      eventDate?: number;
+      location?: string;
+      city?: string;
+      price?: number;
+      imageUrl?: string;
+    } | null;
+  };
+  index: number;
+  total: number;
+}) {
+  const event = ticket.event;
+  const isValid = ticket.status === "VALID";
+  const statusTone = isValid
+    ? "bg-acid text-ink"
+    : ticket.status === "USED"
+      ? "bg-ink text-bone"
+      : "bg-signal text-bone";
+
+  return (
+    <article className="relative border border-ink-line bg-bone text-ink shadow-hard-lg">
+      {/* header strip */}
+      <div className="flex items-center justify-between bg-ink px-5 py-3 text-bone">
+        <span className="font-display text-xl uppercase tracking-[0.08em]">
+          HackB<span className="text-acid">4</span>
+        </span>
+        <span className="text-[9px] uppercase tracking-[0.35em] text-bone-dim">
+          Boarding pass
+          {total > 1 ? ` — ${index + 1} of ${total}` : ""}
+        </span>
+        <span
+          className={`px-3 py-1 text-[9px] font-bold uppercase tracking-[0.25em] ${statusTone}`}
+        >
+          {ticket.status}
+        </span>
+      </div>
+
+      {/* event banner */}
+      {event?.imageUrl && (
+        <div className="relative h-36 w-full overflow-hidden sm:h-44">
+          <Image
+            src={event.imageUrl}
+            alt={event.name || "Event"}
+            fill
+            sizes="(max-width: 768px) 100vw, 700px"
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
+          <h2 className="absolute bottom-3 left-5 font-display text-2xl uppercase tracking-wide text-bone sm:text-3xl">
+            {event.name}
+          </h2>
+        </div>
+      )}
+
+      {/* body: details + perforated stub */}
+      <div className="relative grid sm:grid-cols-[1.7fr_1fr]">
+        {/* punched notches on the perforation line */}
+        <span
+          aria-hidden
+          className="absolute -top-3 right-0 hidden h-6 w-6 rounded-full border border-ink-line bg-ink sm:right-[calc(37%-0.75rem)]"
+        />
+        <span
+          aria-hidden
+          className="absolute -bottom-3 right-0 hidden h-6 w-6 rounded-full border border-ink-line bg-ink sm:right-[calc(37%-0.75rem)]"
+        />
+
+        {/* details */}
+        <div className="p-5 sm:p-6">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3">
+            <DetailCell k="Passenger" v={ticket.attendeeName} s={ticket.attendeeEmail} />
+            <DetailCell
+              k="Departure"
+              v={
+                event?.eventDate
+                  ? format(new Date(event.eventDate), "d MMM yyyy")
+                  : "Confirmed"
+              }
+              s={
+                event?.eventDate
+                  ? format(new Date(event.eventDate), "EEE · HH:mm 'IST'")
+                  : undefined
+              }
+            />
+            <DetailCell
+              k="Gate / Venue"
+              v={event?.city || event?.location || "—"}
+              s={event?.city ? event.location : undefined}
+            />
+            <DetailCell k="Fare paid" v={event?.price === 0 ? "FREE" : `₹${event?.price ?? "—"}`} />
+            <DetailCell k="Class" v="General admission" />
+            <DetailCell k="Issued" v={format(new Date(ticket.purchasedAt), "d MMM yyyy")} />
+          </div>
+
+          <div className="perf-h mt-6 h-3 opacity-40" />
+
+          <div className="mt-4 flex items-center justify-between">
+            <div>
+              <div className="text-[8px] uppercase tracking-[0.3em] text-ink/50">
+                Ticket no.
+              </div>
+              <div className="mt-1 font-terminal text-sm font-bold tracking-wider text-ink">
+                {ticket.ticketNumber}
+              </div>
+            </div>
+            <div className="text-right text-[8px] uppercase leading-relaxed tracking-[0.25em] text-ink/40">
+              Valid ID + this pass
+              <br />
+              Non-transferable
+            </div>
+          </div>
+        </div>
+
+        {/* stub */}
+        <div className="relative border-t border-dashed border-ink/30 p-5 sm:border-l sm:border-t-0 sm:p-6">
+          <div className="perf-v absolute inset-y-4 left-0 w-3 sm:inset-y-0 sm:left-0 sm:h-auto" />
+          <div className="flex flex-col items-center">
+            <div className="bg-white p-4 shadow-[4px_4px_0_0_rgba(11,11,9,1)]">
+              <QRCode
+                value={ticket.qrPayload}
+                size={150}
+                level="H"
+                className="h-auto w-full"
+              />
+            </div>
+            <p className="mt-4 text-[9px] uppercase tracking-[0.3em] text-ink/60">
+              Scan at gate — 2 sec entry
+            </p>
+            <span className="mt-4 hidden font-display text-lg uppercase tracking-widest text-ink/25 sm:block [writing-mode:vertical-rl]">
+              HackB4 · Terminal 4
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* footer strip */}
+      <div className="flex items-center justify-between border-t border-ink/15 px-5 py-2.5 text-[8px] uppercase tracking-[0.25em] text-ink/45">
+        <span>Issued by HackB4 ticketing system</span>
+        <span>Thanks for flying with us</span>
+      </div>
+    </article>
+  );
+}
 
 export default function TicketPassPage({
   params,
@@ -25,12 +244,9 @@ export default function TicketPassPage({
 }) {
   const { ticketId } = use(params);
 
-  // Query as ticket ID
   const directTicket = useQuery(api.tickets.getById, {
     ticketId: ticketId as Id<"tickets">,
   });
-
-  // Query as registration ID (fallback)
   const registrationTickets = useQuery(api.tickets.getByRegistrationId, {
     registrationId: ticketId as Id<"registrations">,
   });
@@ -38,211 +254,49 @@ export default function TicketPassPage({
   const tickets = directTicket ? [directTicket] : registrationTickets || [];
 
   if (directTicket === undefined && registrationTickets === undefined) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <PassSkeleton />;
   }
-
   if (tickets.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-        <TicketIcon className="w-12 h-12 text-gray-400 mb-3" />
-        <h2 className="text-xl font-bold text-gray-900">
-          Ticket Pass Not Found
-        </h2>
-        <p className="text-xs text-gray-500 mt-2">
-          Unable to locate a confirmed ticket with identifier &apos;{ticketId}&apos;.
-        </p>
-        <Link
-          href="/events"
-          className="mt-6 text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-        >
-          Back to Events
-        </Link>
-      </div>
-    );
+    return <PassNotFound ticketId={ticketId} />;
   }
-
-  // Check if any ticket is expired
-  const expiredTickets = tickets.filter(t => t.status === "EXPIRED");
-  if (expiredTickets.length > 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-        <TicketIcon className="w-12 h-12 text-gray-400 mb-3" />
-        <h2 className="text-xl font-bold text-gray-900">
-          Ticket Has Expired
-        </h2>
-        <p className="text-sm text-gray-600 mt-2 max-w-md">
-          This ticket has expired because the event has already concluded.
-        </p>
-        <p className="text-sm text-gray-500 mt-4">
-          Please wait, we will notify you when tickets are live for upcoming events.
-        </p>
-        <Link
-          href="/events"
-          className="mt-6 text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-        >
-          Browse Other Events
-        </Link>
-      </div>
-    );
+  if (tickets.some((t) => String(t.status) === "EXPIRED")) {
+    return <PassExpired />;
   }
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Navigation & Print Actions */}
-        <div className="flex items-center justify-between no-print">
+    <div className="grid-bg min-h-screen">
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+        {/* actions */}
+        <div className="no-print mb-8 flex items-center justify-between">
           <Link
-            href="/events"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            href="/dashboard"
+            className="link-sweep text-[10px] uppercase tracking-[0.3em] text-bone-faint hover:text-bone"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Events</span>
+            ← My passes
           </Link>
-
           <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-all"
+            onClick={() => window.print()}
+            className="border border-ink-line px-5 py-2 text-[10px] uppercase tracking-[0.25em] text-bone-dim transition-colors hover:border-acid hover:bg-acid hover:text-ink"
           >
-            <Printer className="w-4 h-4 text-gray-500" />
-            <span>Print Ticket Pass</span>
+            Print pass
           </button>
         </div>
 
-        {/* Tickets Cards */}
-        {tickets.map((ticket, index) => {
-          const event = ticket.event;
-          return (
-            <div
+        <div className="space-y-10">
+          {tickets.map((ticket, i) => (
+            <PassCard
               key={ticket._id}
-              className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-200"
-            >
-              {/* Event Header Banner */}
-              <div className="relative">
-                {event?.imageUrl && (
-                  <div className="relative w-full aspect-[21/9]">
-                    <Image
-                      src={event.imageUrl}
-                      alt={event.name}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
-                      className="object-cover object-center"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/80" />
-                  </div>
-                )}
-                <div
-                  className={`px-6 py-4 ${
-                    event?.imageUrl
-                      ? "absolute bottom-0 left-0 right-0"
-                      : "bg-blue-600"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs uppercase font-bold tracking-wider text-blue-200">
-                        Official Entry Pass {tickets.length > 1 ? `(#${index + 1})` : ""}
-                      </span>
-                      <h2 className="text-2xl font-bold text-white mt-0.5">
-                        {event?.name || "Confirmed Event Pass"}
-                      </h2>
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                        ticket.status === "VALID"
-                          ? "bg-green-500/20 text-green-300 border border-green-400/40"
-                          : "bg-gray-500/20 text-gray-300"
-                      }`}
-                    >
-                      {ticket.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              ticket={ticket}
+              index={i}
+              total={tickets.length}
+            />
+          ))}
+        </div>
 
-              {/* Ticket Content */}
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Left Column - Details */}
-                  <div className="space-y-4">
-                    <div className="flex items-center text-gray-600">
-                      <CalendarDays className="w-5 h-5 mr-3 text-blue-600 shrink-0" />
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">Date & Time</p>
-                        <p className="font-semibold text-gray-900 text-sm">
-                          {event?.eventDate
-                            ? new Date(event.eventDate).toLocaleDateString()
-                            : "Confirmed"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center text-gray-600">
-                      <MapPin className="w-5 h-5 mr-3 text-blue-600 shrink-0" />
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">Location</p>
-                        <p className="font-semibold text-gray-900 text-sm">
-                          {event?.location}
-                          {event?.city ? `, ${event.city}` : ""}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center text-gray-600">
-                      <User className="w-5 h-5 mr-3 text-blue-600 shrink-0" />
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">Ticket Holder</p>
-                        <p className="font-semibold text-gray-900 text-sm">
-                          {ticket.attendeeName}
-                        </p>
-                        <p className="text-xs text-gray-500">{ticket.attendeeEmail}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center text-gray-600 break-all">
-                      <IdCard className="w-5 h-5 mr-3 text-blue-600 shrink-0" />
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">Ticket Number</p>
-                        <p className="font-mono font-bold text-gray-900 text-sm">
-                          {ticket.ticketNumber}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column - QR Code */}
-                  <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                      <QRCode
-                        value={ticket.qrPayload}
-                        size={170}
-                        level="H"
-                        className="w-full h-auto"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3 text-center font-medium">
-                      Scan at gate for entry
-                    </p>
-                  </div>
-                </div>
-
-                {/* Footer Note */}
-                <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                  <span>Issued by HackB4 Ticketing System</span>
-                  <span>Registered: {new Date(ticket.purchasedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        <p className="no-print mt-10 text-center font-flourish text-lg italic text-bone-faint">
+          Keep this pass on your phone — the gate reads it off glass, no
+          printout needed.
+        </p>
       </div>
     </div>
   );

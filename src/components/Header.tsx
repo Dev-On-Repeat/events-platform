@@ -1,92 +1,101 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import logo from "@/images/lg.png";
-import SearchBar from "./SearchBar";
+import { usePathname } from "next/navigation";
+import Wordmark from "./Wordmark";
+
+const NAV = [
+  { href: "/events", label: "Events" },
+  { href: "/dashboard", label: "My Passes" },
+  { href: "/admin", label: "Admin" },
+  { href: "/admin/checkin", label: "Gate" },
+];
+
+function LiveClock() {
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!now) {
+    return <span className="tabular-nums text-bone-faint">--:--:-- IST</span>;
+  }
+
+  const t = now.toLocaleTimeString("en-IN", {
+    hour12: false,
+    timeZone: "Asia/Kolkata",
+  });
+
+  return (
+    <span className="tabular-nums text-bone-dim">
+      {t} <span className="text-bone-faint">IST</span>
+    </span>
+  );
+}
 
 export default function Header() {
+  const pathname = usePathname();
+
   return (
-    <header className="border-b bg-white sticky top-0 z-50">
-      <div className="flex flex-col lg:flex-row items-center gap-4 p-4 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between w-full lg:w-auto">
-          <Link href="/events" className="font-bold shrink-0">
-            <Image
-              src={logo}
-              alt="HackB4"
-              width={100}
-              height={100}
-              className="w-24 lg:w-28 h-auto"
-              priority
-            />
-          </Link>
+    <header className="sticky top-0 z-50 border-b border-ink-line bg-ink/95 backdrop-blur-sm print:hidden">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-6 px-5 py-4 sm:px-8">
+        <Wordmark size="sm" />
 
-          {/* Mobile Right Action */}
-          <div className="lg:hidden flex items-center gap-2">
-            <Link href="/admin">
-              <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-xs font-medium rounded-lg hover:bg-gray-200 transition border border-gray-300">
-                Admin
-              </button>
-            </Link>
-          </div>
-        </div>
+        {/* primary nav — typographic only */}
+        <nav className="hidden items-center gap-7 md:flex">
+          {NAV.map((item) => {
+            const active =
+              item.href === "/events"
+                ? pathname === "/events" || pathname.startsWith("/events/")
+                : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`link-sweep font-terminal text-[11px] uppercase tracking-[0.22em] transition-colors ${
+                  active
+                    ? "link-sweep-active text-acid"
+                    : "text-bone-dim hover:text-bone"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-        {/* Search Bar - Full width on mobile */}
-        <div className="w-full lg:max-w-2xl">
-          <SearchBar />
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center gap-3 ml-auto">
-          <Link href="/events">
-            <button className="bg-gray-100 text-gray-800 px-3.5 py-2 text-sm font-medium rounded-lg hover:bg-gray-200 transition border border-gray-300">
-              Browse Events
-            </button>
-          </Link>
-
-          <Link href="/dashboard">
-            <button className="bg-gray-100 text-gray-800 px-3.5 py-2 text-sm font-medium rounded-lg hover:bg-gray-200 transition border border-gray-300">
-              My Tickets
-            </button>
-          </Link>
-
-          <Link href="/admin">
-            <button className="bg-gray-100 text-gray-800 px-3.5 py-2 text-sm font-medium rounded-lg hover:bg-gray-200 transition border border-gray-300">
-              Admin Portal
-            </button>
-          </Link>
-
-          <Link href="/admin/checkin">
-            <button className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-3.5 py-2 text-sm font-medium rounded-lg hover:bg-emerald-100 transition">
-              Gate Scanner
-            </button>
-          </Link>
-        </div>
-
-        {/* Mobile Submenu Bar */}
-        <div className="lg:hidden w-full flex items-center gap-2 pt-1 border-t border-gray-100">
-          <Link href="/events" className="flex-1">
-            <button className="w-full bg-gray-100 text-gray-800 py-2 text-xs font-medium rounded-lg border border-gray-300">
-              Browse
-            </button>
-          </Link>
-          <Link href="/dashboard" className="flex-1">
-            <button className="w-full bg-gray-100 text-gray-800 py-2 text-xs font-medium rounded-lg border border-gray-300">
-              My Tickets
-            </button>
-          </Link>
-          <Link href="/admin" className="flex-1">
-            <button className="w-full bg-gray-100 text-gray-800 py-2 text-xs font-medium rounded-lg border border-gray-300">
-              Admin
-            </button>
-          </Link>
-          <Link href="/admin/checkin" className="flex-1">
-            <button className="w-full bg-emerald-50 text-emerald-800 border border-emerald-200 py-2 text-xs font-medium rounded-lg">
-              Scanner
-            </button>
-          </Link>
+        <div className="flex items-center gap-4">
+          <span className="hidden items-center gap-2 text-[11px] uppercase tracking-[0.18em] sm:flex">
+            <span className="inline-block h-1.5 w-1.5 animate-blink rounded-full bg-acid" />
+            <LiveClock />
+          </span>
         </div>
       </div>
+
+      {/* mobile nav strip */}
+      <nav className="flex items-center justify-between border-t border-ink-line px-5 py-2.5 md:hidden">
+        {NAV.map((item) => {
+          const active =
+            item.href === "/events"
+              ? pathname === "/events" || pathname.startsWith("/events/")
+              : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`text-[10px] uppercase tracking-[0.2em] ${
+                active ? "text-acid" : "text-bone-dim"
+              }`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
     </header>
   );
 }
