@@ -4,17 +4,18 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
+import {
+  Download,
+  Search,
+  Filter,
+  FileSpreadsheet,
+  ArrowLeft,
+  Users,
+  CheckCircle2,
+  Clock,
+  XCircle,
+} from "lucide-react";
 import { format } from "date-fns";
-import AdminShell from "@/components/admin/AdminShell";
-
-const statusTone: Record<string, string> = {
-  CONFIRMED: "border-acid text-acid",
-  HELD: "border-amberish text-amberish",
-  PAYMENT_PENDING: "border-amberish text-amberish",
-  PENDING: "border-amberish text-amberish",
-  EXPIRED: "border-signal text-signal",
-  CANCELLED: "border-signal text-signal",
-};
 
 export default function AdminRegistrationsPage() {
   const [search, setSearch] = useState("");
@@ -77,114 +78,141 @@ export default function AdminRegistrationsPage() {
   };
 
   return (
-    <AdminShell
-      tag="— Passenger manifest"
-      title="Regis"
-      accent="trations"
-      active="/admin/registrations"
-      actions={
-        <button
-          onClick={exportCSV}
-          disabled={!registrations || registrations.length === 0}
-          className="border border-ink-line px-5 py-2.5 text-[10px] uppercase tracking-[0.25em] text-bone-dim transition-colors hover:border-acid hover:text-acid disabled:opacity-40"
-        >
-          Export CSV
-        </button>
-      }
-    >
-      <div className="border border-ink-line bg-ink-soft/60">
-        {/* filters */}
-        <div className="flex flex-col gap-4 border-b border-ink-line px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <input
-            type="text"
-            placeholder="SCAN NAME / EMAIL / PHONE / COLLEGE / TEAM…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border-b border-ink-line bg-transparent py-2 font-terminal text-xs uppercase tracking-[0.12em] text-bone placeholder:text-bone-faint/70 focus:border-acid focus:outline-none sm:max-w-sm"
-          />
-          <div className="flex items-center gap-px border border-ink-line bg-ink-line">
-            {["ALL", "CONFIRMED", "HELD", "PENDING", "EXPIRED"].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-3.5 py-2 text-[9px] uppercase tracking-[0.2em] transition-colors ${
-                  statusFilter === status
-                    ? "bg-acid text-ink"
-                    : "bg-ink text-bone-dim hover:text-bone"
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
+    <div className="min-h-screen bg-gray-50/50 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Dashboard</span>
+          </Link>
+
+          <button
+            onClick={exportCSV}
+            disabled={!registrations || registrations.length === 0}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium shadow-sm transition-all disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export CSV</span>
+          </button>
         </div>
 
-        {/* table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-ink-line text-[9px] uppercase tracking-[0.25em] text-bone-faint">
-                <th className="px-6 py-3 font-normal">Attendee</th>
-                <th className="px-4 py-3 font-normal">Event</th>
-                <th className="px-4 py-3 font-normal">College</th>
-                <th className="px-4 py-3 font-normal">Type</th>
-                <th className="px-4 py-3 font-normal">Tix</th>
-                <th className="px-4 py-3 font-normal">Amt</th>
-                <th className="px-4 py-3 font-normal">Status</th>
-                <th className="px-6 py-3 font-normal">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-line">
-              {registrations?.map((r) => (
-                <tr key={r._id} className="transition-colors hover:bg-bone/[0.03]">
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-bone">
-                      {r.primaryParticipant.fullName}
-                    </div>
-                    <div className="mt-0.5 text-[10px] text-bone-faint">
-                      {r.primaryParticipant.email} · {r.primaryParticipant.phone}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-bone-dim">{r.eventName}</td>
-                  <td className="px-4 py-4 text-bone-faint">
-                    {r.primaryParticipant.college}
-                  </td>
-                  <td className="px-4 py-4 text-bone-dim">
-                    {r.registrationType === "TEAM"
-                      ? `Team — ${r.teamDetails?.teamName || "yes"}`
-                      : "Solo"}
-                  </td>
-                  <td className="px-4 py-4 font-bold tabular-nums text-bone">
-                    {r.ticketQuantity}
-                  </td>
-                  <td className="px-4 py-4 font-bold tabular-nums text-bone">
-                    {r.totalAmount === 0 ? "FREE" : `₹${r.totalAmount}`}
-                  </td>
-                  <td className="px-4 py-4">
-                    <span
-                      className={`border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.2em] ${
-                        statusTone[r.status] || "border-ink-line text-bone-faint"
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 tabular-nums text-bone-faint">
-                    {format(new Date(r._creationTime), "MMM d HH:mm")}
-                  </td>
-                </tr>
+        <div className="bg-white rounded-xl p-6 sm:p-8 border border-gray-200 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Registrations & Attendees
+              </h1>
+              <p className="text-xs text-gray-500 mt-1">
+                Audited list of registrations, payment state machine, and team structures.
+              </p>
+            </div>
+            <span className="text-xs font-medium text-gray-400">
+              {registrations ? `${registrations.length} records` : "Loading..."}
+            </span>
+          </div>
+
+          {/* Filters & Search Bar */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="relative flex-1 w-full">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
+              <input
+                type="text"
+                placeholder="Search by name, email, phone, college, team..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-3 py-2 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+              {["ALL", "CONFIRMED", "HELD", "PENDING", "EXPIRED"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                    statusFilter === status
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {status}
+                </button>
               ))}
-              {registrations && registrations.length === 0 && (
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-500 font-semibold border-b border-gray-200">
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-bone-faint">
-                    No records in this filter.
-                  </td>
+                  <th className="py-3 px-4">Attendee / Leader</th>
+                  <th className="py-3 px-4">Event</th>
+                  <th className="py-3 px-4">College</th>
+                  <th className="py-3 px-4">Type</th>
+                  <th className="py-3 px-4">Tickets</th>
+                  <th className="py-3 px-4">Amount</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Date</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {registrations?.map((r) => (
+                  <tr
+                    key={r._id}
+                    className="hover:bg-gray-50/50 transition-colors"
+                  >
+                    <td className="py-3.5 px-4 font-bold text-gray-900">
+                      <div>{r.primaryParticipant.fullName}</div>
+                      <div className="text-[11px] text-gray-500 font-normal">
+                        {r.primaryParticipant.email} • {r.primaryParticipant.phone}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-gray-800">
+                      {r.eventName}
+                    </td>
+                    <td className="py-3.5 px-4 text-gray-500">
+                      {r.primaryParticipant.college}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="font-medium text-gray-700">
+                        {r.registrationType === "TEAM"
+                          ? `Team: ${r.teamDetails?.teamName || "Yes"}`
+                          : "Solo"}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900">{r.ticketQuantity}</td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900">
+                      {r.totalAmount === 0 ? "FREE" : `₹${r.totalAmount}`}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          r.status === "CONFIRMED"
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : r.status === "HELD" || r.status === "PAYMENT_PENDING"
+                              ? "bg-blue-50 text-blue-700 border border-blue-200"
+                              : r.status === "PENDING"
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-red-50 text-red-700 border border-red-200"
+                        }`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-gray-400">
+                      {format(new Date(r._creationTime), "MMM d, HH:mm")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </AdminShell>
+    </div>
   );
 }

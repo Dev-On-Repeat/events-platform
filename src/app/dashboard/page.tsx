@@ -4,181 +4,186 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/useAuth";
+import { Ticket, Calendar, User, Mail, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-
-const statusTone: Record<string, string> = {
-  VALID: "border-acid text-acid",
-  USED: "border-bone-faint text-bone-dim",
-  EXPIRED: "border-bone-faint text-bone-faint",
-  CANCELLED: "border-signal text-signal",
-};
 
 export default function DashboardPage() {
   const router = useRouter();
   const { session, clearSession } = useAuth();
-  const myTickets = useQuery(
-    api.tickets.listBySession,
-    session ? { sessionId: session } : "skip"
-  );
-
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const myTickets = useQuery(api.tickets.listBySession, { sessionId: session || "" });
 
   const handleLogout = () => {
     clearSession();
     router.push("/events");
   };
 
-  if (!mounted) {
-    return (
-      <div className="grid-bg flex min-h-[70vh] items-center justify-center">
-        <p className="animate-blink text-[11px] uppercase tracking-[0.4em] text-bone-faint">
-          Opening terminal<span className="text-acid">…</span>
-        </p>
-      </div>
-    );
-  }
-
   if (!session) {
     return (
-      <div className="grid-bg flex min-h-[80vh] items-center justify-center px-5">
-        <div className="max-w-lg border border-ink-line bg-ink-soft/60 p-10 text-center sm:p-14">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-bone-faint">
-            Access restricted
-          </p>
-          <h1 className="mt-5 font-display text-5xl uppercase leading-tight tracking-wide">
-            No <span className="text-outline">manifest</span> found
-          </h1>
-          <p className="mt-4 font-flourish text-xl italic text-bone-dim">
-            Register for a departure and your passes will appear here.
-          </p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Please register for an event to access your dashboard</p>
           <Link
             href="/events"
-            className="mt-10 inline-block border border-acid bg-acid px-8 py-3.5 text-[11px] uppercase tracking-[0.3em] text-ink transition-colors hover:bg-transparent hover:text-acid"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
           >
-            Browse departures →
+            Browse Events
           </Link>
         </div>
       </div>
     );
   }
 
-  const tickets = myTickets || [];
-  const validCount = tickets.filter((t) => t.status === "VALID").length;
-  const usedCount = tickets.filter((t) => t.status === "USED").length;
-
   return (
-    <div className="grid-bg min-h-screen">
-      <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-12 sm:px-8 sm:pt-16">
-        {/* masthead */}
-        <div className="animate-rise-in flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-bone-faint">
-              HackB4 <span className="text-acid">/</span> Passenger terminal
-            </p>
-            <h1 className="mt-4 font-display text-[clamp(2.75rem,7vw,5.5rem)] uppercase leading-[0.95] tracking-wide">
-              My <span className="text-outline">passes</span>
-            </h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
+              <p className="text-sm text-gray-500 mt-1">Manage your tickets and registrations</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Clear Session</span>
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="border border-ink-line px-5 py-2.5 text-[10px] uppercase tracking-[0.25em] text-bone-dim transition-colors hover:border-signal hover:text-signal"
-          >
-            End session ×
-          </button>
         </div>
+      </div>
 
-        {/* stats strip */}
-        <div className="mt-12 grid grid-cols-3 gap-px border border-ink-line bg-ink-line">
-          {[
-            { v: tickets.length, l: "Total passes" },
-            { v: validCount, l: "Active" },
-            { v: usedCount, l: "Used" },
-          ].map((s) => (
-            <div key={s.l} className="bg-ink-soft px-5 py-6 sm:px-8">
-              <div className="font-display text-5xl text-bone">
-                {myTickets ? s.v : "··"}
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-lg bg-blue-50">
+                <Ticket className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="mt-1 text-[9px] uppercase tracking-[0.25em] text-bone-faint">
-                {s.l}
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {myTickets?.length || 0}
+                </div>
+                <div className="text-xs text-gray-500">Total Tickets</div>
               </div>
             </div>
-          ))}
+          </div>
+
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-lg bg-green-50">
+                <Calendar className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {myTickets?.filter(t => t.status === "VALID").length || 0}
+                </div>
+                <div className="text-xs text-gray-500">Active Tickets</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-lg bg-gray-50">
+                <User className="w-6 h-6 text-gray-600" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {myTickets?.filter(t => t.status === "USED").length || 0}
+                </div>
+                <div className="text-xs text-gray-500">Used Tickets</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* passes */}
-        {!myTickets ? (
-          <div className="mt-8 border border-ink-line bg-ink-soft/60 p-12 text-center">
-            <p className="animate-blink text-[11px] uppercase tracking-[0.4em] text-bone-faint">
-              Loading manifest<span className="text-acid">…</span>
-            </p>
+        {/* Tickets List */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-bold text-gray-900">My Tickets</h2>
           </div>
-        ) : tickets.length === 0 ? (
-          <div className="mt-8 border border-ink-line bg-ink-soft/60 p-12 text-center sm:p-16">
-            <p className="font-flourish text-3xl italic text-bone-dim">
-              Your wallet is empty.
-            </p>
-            <p className="mt-3 text-[11px] uppercase tracking-[0.25em] text-bone-faint">
-              Claim a pass — the board is live
-            </p>
-            <Link
-              href="/events"
-              className="mt-8 inline-block border border-acid bg-acid px-8 py-3 text-[11px] uppercase tracking-[0.3em] text-ink transition-colors hover:bg-transparent hover:text-acid"
-            >
-              Departures board →
-            </Link>
-          </div>
-        ) : (
-          <div className="mt-8 divide-y divide-ink-line border border-ink-line bg-ink-soft/60">
-            {tickets.map((ticket, i) => (
-              <button
-                key={ticket._id}
-                onClick={() => router.push(`/ticket/${ticket._id}`)}
-                className="group grid w-full grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-4 px-5 py-5 text-left transition-colors hover:bg-bone/[0.04] sm:grid-cols-[3rem_minmax(0,1fr)_8rem_7rem_2rem] sm:px-6"
+
+          {!myTickets || myTickets.length === 0 ? (
+            <div className="p-12 text-center">
+              <Ticket className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No tickets yet</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Register for an event to get your tickets
+              </p>
+              <Link
+                href="/events"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
               >
-                <span className="text-[11px] tabular-nums text-bone-faint">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-
-                <span className="min-w-0">
-                  <span className="block truncate font-display text-xl uppercase tracking-wide text-bone transition-colors group-hover:text-acid sm:text-2xl">
-                    {ticket.event?.name || "Pass"}
-                  </span>
-                  <span className="mt-0.5 block text-[10px] uppercase tracking-[0.18em] text-bone-faint">
-                    #{ticket.ticketNumber} ·{" "}
-                    {ticket.registration?.registrationType === "TEAM"
-                      ? `${ticket.registration?.ticketQuantity} members`
-                      : "Solo"}{" "}
-                    · {ticket.attendeeName}
-                  </span>
-                </span>
-
-                <span className="hidden text-xs tabular-nums text-bone-dim sm:block">
-                  {ticket.event?.eventDate
-                    ? format(new Date(ticket.event.eventDate), "d MMM yyyy")
-                    : "TBD"}
-                </span>
-
-                <span
-                  className={`justify-self-start border px-3 py-1 text-[9px] font-bold uppercase tracking-[0.25em] sm:justify-self-end ${
-                    statusTone[ticket.status] || "border-ink-line text-bone-faint"
-                  }`}
+                Browse Events
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {myTickets.map((ticket) => (
+                <div
+                  key={ticket._id}
+                  className="p-6 hover:bg-gray-50 transition cursor-pointer"
+                  onClick={() => router.push(`/ticket/${ticket._id}`)}
                 >
-                  {ticket.status}
-                </span>
-
-                <span
-                  aria-hidden
-                  className="hidden justify-self-end text-bone-faint transition-all duration-300 group-hover:translate-x-1 group-hover:text-acid sm:block"
-                >
-                  →
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            ticket.status === "VALID"
+                              ? "bg-green-50 text-green-700"
+                              : ticket.status === "USED"
+                              ? "bg-blue-50 text-blue-700"
+                              : ticket.status === "EXPIRED"
+                              ? "bg-gray-50 text-gray-600"
+                              : "bg-red-50 text-red-700"
+                          }`}
+                        >
+                          {ticket.status}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          #{ticket.ticketNumber}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-semibold text-gray-900 mb-1">
+                        {ticket.event?.name}
+                      </h3>
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>
+                            {ticket.event?.eventDate
+                              ? new Date(ticket.event.eventDate).toLocaleDateString()
+                              : "TBD"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <User className="w-3.5 h-3.5" />
+                          <span>{ticket.attendeeName}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-gray-900">
+                        {ticket.event?.price === 0 ? "FREE" : `₹${ticket.event?.price}`}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {ticket.registration?.registrationType === "TEAM"
+                          ? `${ticket.registration?.ticketQuantity} members`
+                          : "Solo"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

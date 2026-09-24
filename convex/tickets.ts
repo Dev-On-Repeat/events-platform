@@ -3,9 +3,6 @@ import { v } from "convex/values";
 import { TICKET_STATUS } from "./constants";
 
 export const getById = query({
-  // Accepts any ID string: the ticket page probes with either a ticket ID
-  // or a registration ID (fallback flow), so an invalid tickets ID must
-  // return null instead of throwing a validator error.
   args: { ticketId: v.string() },
   handler: async (ctx, { ticketId }) => {
     const normalized = ctx.db.normalizeId("tickets", ticketId);
